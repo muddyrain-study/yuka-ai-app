@@ -66,46 +66,72 @@ requestAnimationFrame(function animate() {
 // scene.add(cone);
 
 // 加载模型
-const loader = new GLTFLoader();
-const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath("./draco/");
-loader.setDRACOLoader(dracoLoader);
-loader.load("./model/car.gltf", function (gltf) {
-  // console.log(gltf);
-  // 创建群体随机行走行为
-  const wanderBehavior = new YUKA.WanderBehavior(3);
+const loader = new GLTFLoader()
+const dracoLoader = new DRACOLoader()
+dracoLoader.setDecoderPath('/draco/')
+loader.setDRACOLoader(dracoLoader)
+let c1, c2
 
-  // 设置整齐群体转向
-  const alignmentBehavior = new YUKA.AlignmentBehavior();
-  alignmentBehavior.weight = 5;
+c1 = loader.loadAsync('/model/car.gltf')
+c2 = loader.loadAsync('/model/truck.gltf')
 
-  // 设置聚集行为
-  const cohesionBehavior = new YUKA.CohesionBehavior();
-  cohesionBehavior.weight = 5;
+Promise.all([c1, c2]).then(res => {
 
-  // 设置分离行为
-  const separationBehavior = new YUKA.SeparationBehavior();
-  separationBehavior.weight = 0.5;
+  const truck = res[1].scene
+  truck.children[0].rotation.y = Math.PI / 2
+  truck.children[0].scale.set(0.25, 0.25, 0.25)
 
-  for (let i = 0; i < 40; i++) {
-    // 创建yuka的车辆
-    const vehicle = new YUKA.Vehicle();
-    vehicle.position.set(Math.random() * 20 - 10, 0, Math.random() * 20 - 10);
-    vehicle.rotation.fromEuler(0, Math.random() * Math.PI, 0);
-    vehicle.maxSpeed = 3;
-    const car = gltf.scene.clone();
-    car.children[0].rotation.y = Math.PI / 2;
-    car.children[0].scale.set(0.2, 0.2, 0.2);
-    scene.add(car);
-    vehicle.setRenderComponent(car, callback);
-    entityManager.add(vehicle);
+  const vehicle2 = new YUKA.Vehicle()
+  vehicle2.position.set(
+    Math.random() * 20 - 10,
+    0,
+    Math.random() * 20 - 10
+  )
+  vehicle2.setRenderComponent(truck, callback)
+  entityManager.add(vehicle2)
+  scene.add(truck)
 
-    vehicle.steering.add(wanderBehavior);
-    vehicle.steering.add(alignmentBehavior);
-    vehicle.steering.add(cohesionBehavior);
-    vehicle.steering.add(separationBehavior);
+
+
+  // 设置卡车追击行为  第二个参数 - 预测转弯
+  // const pursuitBehavior = new YUKA.PursuitBehavior(vehicle2)
+  // vehicle.steering.add(pursuitBehavior)
+
+  const offsets = [
+    new YUKA.Vector3(0, 0, 1),
+    new YUKA.Vector3(-1, 0, 1),
+    new YUKA.Vector3(1, 0, 1),
+    new YUKA.Vector3(-3, 0, 3),
+    new YUKA.Vector3(3, 0, 3),
+  ]
+
+  for (let i = 0; i < offsets.length; i++) {
+    const car = res[0].scene.clone()
+    car.children[0].rotation.y = Math.PI / 2
+    car.children[0].scale.set(0.25, 0.25, 0.25)
+    const vehicle = new YUKA.Vehicle()
+    vehicle.maxSpeed = 6
+    vehicle.position.set(
+      Math.random() * 20 - 10,
+      0,
+      Math.random() * 20 - 10
+    )
+    vehicle.setRenderComponent(car, callback)
+    entityManager.add(vehicle)
+    scene.add(car)
+    const offsetPursuitBehavior = new YUKA.OffsetPursuitBehavior(vehicle2, offsets[i])
+    vehicle.steering.add(offsetPursuitBehavior)
   }
-});
+
+  // 设置卡车到达目标行为
+  const arriveBehavior = new YUKA.ArriveBehavior(target.position)
+  vehicle2.steering.add(arriveBehavior)
+  vehicle2.maxSpeed = 4
+
+  setInterval(() => {
+    target.position.set(Math.random() * 50 - 25, 0, Math.random() * 50 - 25)
+  }, 3000);
+})
 
 // 设置车辆的渲染对象
 function callback(entity, renderComponent) {

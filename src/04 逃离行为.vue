@@ -66,47 +66,22 @@ requestAnimationFrame(function animate() {
 // scene.add(cone);
 
 // 加载模型
-const loader = new GLTFLoader();
-const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath("./draco/");
-loader.setDRACOLoader(dracoLoader);
+const loader = new GLTFLoader()
+const dracoLoader = new DRACOLoader()
+dracoLoader.setDecoderPath('/draco/')
+loader.setDRACOLoader(dracoLoader)
 loader.load("./model/car.gltf", function (gltf) {
-  // console.log(gltf);
-  // 创建群体随机行走行为
-  const wanderBehavior = new YUKA.WanderBehavior(3);
+  const car = gltf.scene
+  car.children[0].rotation.y = Math.PI / 2
+  car.children[0].scale.set(0.25, 0.25, 0.25)
+  scene.add(car)
+  vehicle.setRenderComponent(car, callback);
 
-  // 设置整齐群体转向
-  const alignmentBehavior = new YUKA.AlignmentBehavior();
-  alignmentBehavior.weight = 5;
+})
 
-  // 设置聚集行为
-  const cohesionBehavior = new YUKA.CohesionBehavior();
-  cohesionBehavior.weight = 5;
-
-  // 设置分离行为
-  const separationBehavior = new YUKA.SeparationBehavior();
-  separationBehavior.weight = 0.5;
-
-  for (let i = 0; i < 40; i++) {
-    // 创建yuka的车辆
-    const vehicle = new YUKA.Vehicle();
-    vehicle.position.set(Math.random() * 20 - 10, 0, Math.random() * 20 - 10);
-    vehicle.rotation.fromEuler(0, Math.random() * Math.PI, 0);
-    vehicle.maxSpeed = 3;
-    const car = gltf.scene.clone();
-    car.children[0].rotation.y = Math.PI / 2;
-    car.children[0].scale.set(0.2, 0.2, 0.2);
-    scene.add(car);
-    vehicle.setRenderComponent(car, callback);
-    entityManager.add(vehicle);
-
-    vehicle.steering.add(wanderBehavior);
-    vehicle.steering.add(alignmentBehavior);
-    vehicle.steering.add(cohesionBehavior);
-    vehicle.steering.add(separationBehavior);
-  }
-});
-
+// 创建 yuka 车辆
+const vehicle = new YUKA.Vehicle()
+vehicle.maxSpeed = 5;
 // 设置车辆的渲染对象
 function callback(entity, renderComponent) {
   renderComponent.position.copy(entity.position);
@@ -135,10 +110,75 @@ target.position.set(
 )
 // 创建对实体管理对象
 const entityManager = new YUKA.EntityManager();
-// entityManager.add(vehicle);
+entityManager.add(vehicle);
 entityManager.add(target);
 
+// 抵达行为
+// const arriveBehavior = new YUKA.ArriveBehavior(target.position, 1)
+// vehicle.steering.add(arriveBehavior)
 
+// 搜索目标行为
+// const seekBehavior = new YUKA.SeekBehavior(target.position)
+// vehicle.steering.add(seekBehavior)
+
+// 点击将目标移动到点击的位置
+const ndc = new THREE.Vector2()
+const raycaster = new THREE.Raycaster()
+window.addEventListener('pointerdown', (event) => {
+  ndc.x = (event.clientX / window.innerWidth) * 2 - 1;
+  ndc.y = - (event.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(ndc, camera);
+  const intersects = raycaster.intersectObject(plane);
+  if (intersects.length > 0) {
+    const point = intersects[0].point
+    target.position.set(point.x, 0, point.z)
+  }
+})
+
+// 创建障碍物数组
+const obstacles = []
+
+// 创建10个threejs 盒子
+for (let i = 0; i < 10; i++) {
+  const boxGeometry = new THREE.BoxGeometry(
+    Math.floor(Math.random() * 5) + 1,
+    Math.floor(Math.random() * 5) + 1, 3
+  )
+  const box = new THREE.Mesh(
+    boxGeometry,
+    new THREE.MeshStandardMaterial({
+      color: 0xffffff
+    })
+  )
+  box.receiveShadow = true
+  box.castShadow = true
+  box.position.set(
+    Math.random() * 30 - 15,
+    0,
+    Math.random() * 30 - 15,
+  )
+  scene.add(box)
+  // 创建障碍物
+  const obstacle = new YUKA.GameEntity()
+  obstacle.position.copy(box.position)
+
+  boxGeometry.computeBoundingSphere()
+  obstacle.boundingRadius = boxGeometry.boundingSphere.radius
+  obstacles.push(obstacle)
+  // obstacle.setRenderComponent(box, callback) 
+  entityManager.add(obstacle)
+}
+
+// 避障行为
+const obstacleAvoidanceBehavior = new YUKA.ObstacleAvoidanceBehavior(
+  obstacles
+)
+vehicle.steering.add(obstacleAvoidanceBehavior)
+vehicle.smoother = new YUKA.Smoother(30)
+
+// 逃离行为  
+const fleeBehavior = new YUKA.FleeBehavior(target.position, 3)
+vehicle.steering.add(fleeBehavior)
 </script>
 
 <template>
