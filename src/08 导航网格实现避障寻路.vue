@@ -4,9 +4,6 @@ import * as YUKA from "yuka"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader"
-import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader"
-
-import { Reflector } from "./mesh/Reflector.js";
 
 // 创建场景
 const scene = new THREE.Scene();
@@ -24,17 +21,14 @@ camera.lookAt(0, 0, 0);
 // 创建渲染器
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.shadowMap.enabled = true;
-renderer.outputEncoding = THREE.sRGBEncoding
-renderer.toneMapping = THREE.ACESFilmicToneMapping
-renderer.toneMappingExposure = 1
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 // 创建灯光
-// const light = new THREE.SpotLight(0xffffff, 3, 100, Math.PI / 6, 0.5);
-// light.position.set(10, 40, 10);
-// light.castShadow = true;
-// scene.add(light);
+const light = new THREE.SpotLight(0xffffff, 3, 100, Math.PI / 6, 0.5);
+light.position.set(10, 40, 10);
+light.castShadow = true;
+scene.add(light);
 
 // 创建控制器
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -44,40 +38,45 @@ const time = new YUKA.Time();
 requestAnimationFrame(function animate() {
   const delta = time.update().getDelta();
   controls.update();
+  if (navMesh) {
+    const currentRegion = navMesh.getRegionForPoint(vehicle.position)
+    if (currentRegion) {
+      const distance = currentRegion.distanceToPoint(vehicle.position)
+      vehicle.position.y -= distance
+    }
+  }
   entityManager.update(delta);
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 });
-
-class CustomVechicle extends YUKA.Vehicle {
-  constructor(navMesh) {
-    super();
-    this.navMesh = navMesh;
-  }
-  update(delta) {
-    super.update(delta);
-    const currentRegion = this.navMesh.getRegionForPoint(this.position);
-    if (currentRegion) {
-      const distance = currentRegion.distanceToPoint(this.position);
-      this.position.y -= distance * 0.2;
-    }
-  }
-}
 
 // 加载模型
 const loader = new GLTFLoader()
 const dracoLoader = new DRACOLoader()
 dracoLoader.setDecoderPath('/draco/')
 loader.setDRACOLoader(dracoLoader)
-
+loader.load("./model/car.gltf", function (gltf) {
+  const car = gltf.scene
+  car.children[0].rotation.y = Math.PI / 2
+  car.children[0].scale.set(0.25, 0.25, 0.25)
+  scene.add(car)
+  vehicle.setRenderComponent(car, callback);
+})
 let plane
-loader.load("./model/city.glb", gltf => {
+loader.load("./model/modelMap.gltf", gltf => {
   plane = gltf.scene
+  plane.traverse(child => {
+    if (child.isMesh) {
+      child.receiveShadow = true
+      child.castShadow = true
+    }
+  })
   scene.add(plane)
 })
 
 // 创建 yuka 车辆
-let vehicle
+const vehicle = new YUKA.Vehicle()
+vehicle.maxSpeed = 5;
 // 设置车辆的渲染对象
 function callback(entity, renderComponent) {
   renderComponent.position.copy(entity.position);
@@ -106,6 +105,7 @@ target.position.set(
 )
 // 创建对实体管理对象
 const entityManager = new YUKA.EntityManager();
+entityManager.add(vehicle);
 entityManager.add(target);
 
 
@@ -138,7 +138,7 @@ window.addEventListener('pointerdown', (event) => {
     // vehicle.steering.add(followPathBehavior)
 
     const onPathBehavior = new YUKA.OnPathBehavior(path1, 0.1, 0.1);
-    // onPathBehavior.weight = 10;
+    onPathBehavior.weight = 10;
     vehicle.steering.add(onPathBehavior);
 
     const arriveBehavior = new YUKA.ArriveBehavior(to, 3, 0.1);
@@ -175,40 +175,9 @@ function showPathLine(path) {
 const navMeshLoader = new YUKA.NavMeshLoader()
 // 加载网格
 let navMesh
-navMeshLoader.load("./model/citymap1.gltf").then((navigationMesh) => {
+navMeshLoader.load("./model/modelMap.gltf").then((navigationMesh) => {
   navMesh = navigationMesh
-
-  vehicle = new CustomVechicle(navMesh);
-  vehicle.maxSpeed = 5;
-  vehicle.smoother = new YUKA.Smoother(30);
-  entityManager.add(vehicle);
-
-  loader.load("./model/robot.glb", function (gltf) {
-    const car = gltf.scene
-    // car.children[0].rotation.y = Math.PI / 2
-    car.children[0].scale.set(0.6, 0.6, 0.6);
-    scene.add(car)
-    vehicle.setRenderComponent(car, callback);
-  })
 })
-
-const hdrLoader = new RGBELoader()
-hdrLoader.load("./texture/013.hdr", function (texture) {
-  texture.mapping = THREE.EquirectangularReflectionMapping
-  scene.background = texture
-  scene.environment = texture
-})
-
-let mirrorGeometry = new THREE.PlaneGeometry(200, 100);
-let groundMirror = new Reflector(mirrorGeometry, {
-  clipBias: 0.003,
-  textureWidth: window.innerWidth * window.devicePixelRatio,
-  textureHeight: window.innerHeight * window.devicePixelRatio,
-  color: 0x777777,
-});
-groundMirror.position.y = 0.1;
-groundMirror.rotateX(-Math.PI / 2);
-scene.add(groundMirror);
 </script>
 
 <template>
