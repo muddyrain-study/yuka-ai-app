@@ -1,0 +1,100 @@
+{
+    "asset" : {
+        "generator" : "Khronos glTF Blender I/O v3.2.40",
+        "version" : "2.0"
+    },
+    "scene" : 0,
+    "scenes" : [
+        {
+            "name" : "Scene",
+            "nodes" : [
+                0
+            ]
+        }
+    ],
+    "nodes" : [
+        {
+            "mesh" : 0,
+            "name" : "Navmesh"
+        }
+    ],
+    "meshes" : [
+        {
+            "name" : "Navmesh.001",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2
+                    },
+                    "indices" : 3
+                }
+            ]
+        }
+    ],
+    "accessors" : [
+        {
+            "bufferView" : 0,
+            "componentType" : 5126,
+            "count" : 39,
+            "max" : [
+                10.071052551269531,
+                0,
+                12.173068046569824
+            ],
+            "min" : [
+                -9.928947448730469,
+                0,
+                -17.82693099975586
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 1,
+            "componentType" : 5126,
+            "count" : 39,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 2,
+            "componentType" : 5126,
+            "count" : 39,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 3,
+            "componentType" : 5123,
+            "count" : 111,
+            "type" : "SCALAR"
+        }
+    ],
+    "bufferViews" : [
+        {
+            "buffer" : 0,
+            "byteLength" : 468,
+            "byteOffset" : 0
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 468,
+            "byteOffset" : 468
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 312,
+            "byteOffset" : 936
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 222,
+            "byteOffset" : 1248
+        }
+    ],
+    "buffers" : [
+        {
+            "byteLength" : 1472,
+            "uri" : "data:application/octet-stream;base64,+NwewQAAAAA7dvrA+NwewQAAAAA7dvrA4HMbwAAAAICJEwtACCMhQQAAAIA7dvrAEUaiQAAAAAA7dvrA8LmdwAAAAICJEwtAEUaiQAAAAACJEwtA8LmdwAAAAAB37DTACCMhQQAAAIDjxEJB8LmdwAAAAIA7dvrAIIwkQAAAAIC2Y6e++NwewQAAAIDjxEJB+NwewQAAAIDjxEJB+NwewQAAAADt2Mm/+NwewQAAAADt2Mm/EUbyQAAAAAA7dvrA4HMbwAAAAIDFiZVA4HMbwAAAAIDFiZVA8LmdwAAAAIDFiZVA8LmdwAAAAIC2Y6e+77ntwAAAAAB37DTAEUbyQAAAAIC2Y6e+4HMbwAAAAIC2Y6e+77ntwAAAAAA7dqrA77ntwAAAAAA7dqrAEUaiQAAAAIDFieVAEUaiQAAAAIDFieVAIIwkQAAAAIDFieVAIIwkQAAAAIDFieVAEUbyQAAAAICJEwtAEUbyQAAAAICJEwtA4HMbwAAAAIA7dqrA77ntwAAAAIA7dvrA8LmdwAAAAAAdO03BEUaiQAAAAAA7dvrAEUbyQAAAAAA7dvrAEUaiQAAAAAAdO03BEUbyQAAAAICOnY7B77ntwAAAAICOnY7BAAAAAP//fz8AAACAAAAAAAAAgD8AAACAAAAAAAAAgD8AAACAAAAAAAAAgD8AAACAAAAAAAAAgD8AAACAAAAAAAAAgD8AAACAAAAAAP//fz8AAACAAAAAAAAAgD8AAACAAAAAAAAAgD8AAACAAAAAAAAAgD8AAACAAAAAAAAAgD8AAACAAAAAAP//fz8AAACAAAAAAAAAgD8AAACAAAAAAP//fz8AAACAAAAAAAAAgD8AAACAAAAAAAAAgD8AAACAAAAAAP//fz8AAACAAAAAAAAAgD8AAACAAAAAAAAAgD8AAACAAAAAAAAAgD8AAACAAAAAAAAAgD8AAACAAAAAAAAAgD8AAACAAAAAAAAAgD8AAACAAAAAAP//fz8AAACAAAAAAAAAgD8AAACAAAAAAP//fz8AAACAAAAAAAAAgD8AAACAAAAAAP//fz8AAACAAAAAAAAAgD8AAACAAAAAAP//fz8AAACAAAAAAAAAgD8AAACAAAAAAAAAgD8AAACAAAAAAAAAgD8AAACAAAAAAAAAgD8AAACAAAAAAAAAgD8AAACAAAAAAAAAgD8AAACAAAAAAAAAgD8AAACAAAAAAAAAgD8AAACAAAAAAAAAgD8AAACAAAAAAAAAAAAAAAAAAAAAAAAAwD4AAAA/AACAPwAAAAAAAEA/AAAAAAAAgD4AAAA/AABAPwAAAD8AAIA+AACAPgAAgD8AAIA/AACAPgAAAAAAACA/AADAPgAAAAAAAIA/AAAAAAAAgD8AAAAAAACgPgAAAAAAAKA+AABgPwAAAAAAAMA+AAAgPwAAwD4AACA/AACAPgAAID8AAIA+AADAPgAAAD4AAIA+AABgPwAAwD4AAMA+AADAPgAAAD4AAAA+AAAAPgAAAD4AAEA/AABAPwAAQD8AAEA/AAAgPwAAQD8AACA/AABAPwAAYD8AAAA/AABgPwAAAD8AAMA+AAAAPgAAAD4AAAAAAACAPgAAAAAAAEA/AAAAAAAAYD8AAAAAAABAPwAAAAAAAGA/AAAAAAAAAD4AAAAAAwAPABUAHwAgABgAFQAJAB8ACAAVAB4AFQAfAAoAAgATAAUAFwAAAA0AEgAOAAwACAAaAAwAHAACABEAHQAGABkACAAeABoAIQAmACAABAAjACIAIwAkACIAJgAkACUAHwAJACAAEwAHABQACgAfABYAFQAEAAkACAADABUAAgAWABMAAgAKABYAEwAUAA4ABQATAA4AGAAgAAEAFAAYAA4ADAARABIAEgAFAA4ACwAbABAADAAaABwAHAAKAAIAFQAPAAQACQAhACAABAAPACMAIwAlACQAJgAhACQAAAA="
+        }
+    ]
+}

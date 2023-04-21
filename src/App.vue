@@ -2,6 +2,8 @@
 import * as THREE from "three"
 import * as YUKA from "yuka"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader"
 
 // 创建场景
 const scene = new THREE.Scene();
@@ -54,24 +56,37 @@ requestAnimationFrame(function animate() {
 });
 
 // 创建椎体
-const coneGeometry = new THREE.ConeGeometry(0.2, 1, 32);
-coneGeometry.rotateX(Math.PI / 2);
-const coneMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
-const cone = new THREE.Mesh(coneGeometry, coneMaterial);
-cone.matrixAutoUpdate = false;
-cone.receiveShadow = true;
-cone.castShadow = true;
-scene.add(cone);
+// const coneGeometry = new THREE.ConeGeometry(0.2, 1, 32);
+// coneGeometry.rotateX(Math.PI / 2);
+// const coneMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+// const cone = new THREE.Mesh(coneGeometry, coneMaterial);
+// // cone.matrixAutoUpdate = false;
+// cone.receiveShadow = true;
+// cone.castShadow = true;
+// scene.add(cone);
+
+// 加载模型
+const loader = new GLTFLoader()
+const dracoLoader = new DRACOLoader()
+dracoLoader.setDecoderPath('/draco/')
+loader.setDRACOLoader(dracoLoader)
+loader.load("./model/car.gltf", function (gltf) {
+  const car = gltf.scene
+  car.children[0].rotation.y = Math.PI / 2
+  car.children[0].scale.set(0.2, 0.2, 0.2)
+  scene.add(car)
+  vehicle.setRenderComponent(car, callback);
+
+})
 
 // 创建 yuka 车辆
 const vehicle = new YUKA.Vehicle()
 vehicle.maxSpeed = 5;
 // 设置车辆的渲染对象
-vehicle.setRenderComponent(cone, callback);
 function callback(entity, renderComponent) {
-  // renderComponent.position.copy(entity.position);
-  // renderComponent.quaternion.copy(entity.rotation);
-  renderComponent.matrix.copy(entity.worldMatrix);
+  renderComponent.position.copy(entity.position);
+  renderComponent.quaternion.copy(entity.rotation);
+  // renderComponent.matrix.copy(entity.worldMatrix);
 }
 
 // 创建yuka的路径
@@ -90,6 +105,12 @@ vehicle.position.copy(path.current());
 // 跟随路径的行为
 const followPathBehavior = new YUKA.FollowPathBehavior(path);
 vehicle.steering.add(followPathBehavior);
+
+// 保持在路径中的行为
+const onPathBehavior = new YUKA.OnPathBehavior(path, 0.1);
+// 限制权重
+onPathBehavior.weight = 10
+vehicle.steering.add(onPathBehavior);
 
 // 创建对实体管理对象
 const entityManager = new YUKA.EntityManager();
