@@ -33,7 +33,7 @@ const planeMaterial = new THREE.MeshStandardMaterial({
 const plane = new THREE.Mesh(planeGeometry, planeMaterial)
 plane.receiveShadow = true
 plane.rotation.x = -Math.PI / 2
-plane.position.y = -0.5
+plane.position.y = -0.5;
 scene.add(plane);
 
 // 创建灯光
@@ -73,7 +73,7 @@ loader.setDRACOLoader(dracoLoader)
 loader.load("./model/car.gltf", function (gltf) {
   const car = gltf.scene
   car.children[0].rotation.y = Math.PI / 2
-  car.children[0].scale.set(0.25, 0.25, 0.25)
+  car.children[0].scale.set(0.2, 0.2, 0.2)
   scene.add(car)
   vehicle.setRenderComponent(car, callback);
 
@@ -88,47 +88,35 @@ function callback(entity, renderComponent) {
   renderComponent.quaternion.copy(entity.rotation);
   // renderComponent.matrix.copy(entity.worldMatrix);
 }
-// 创建目标小球
-const sphereGeometry = new THREE.SphereGeometry(0.2, 32, 32)
-const sphereMaterial = new THREE.MeshStandardMaterial({
-  color: 0xff00ff
-})
-const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial)
-sphere.receiveShadow = true
-sphere.castShadow = true
 
-scene.add(sphere)
+// 创建yuka的路径
+const path = new YUKA.Path();
+path.add(new YUKA.Vector3(0, 0, 0));
+path.add(new YUKA.Vector3(0, 0, 10));
+path.add(new YUKA.Vector3(10, 0, 10));
+path.add(new YUKA.Vector3(10, 0, 0));
+path.add(new YUKA.Vector3(0, 0, 0));
+// 设置路径的循环模式
+path.loop = true;
 
-// 创建目标
-const target = new YUKA.GameEntity();
-target.setRenderComponent(sphere, callback)
+// 将路径当前的位置设置为车辆的位置
+vehicle.position.copy(path.current());
 
-target.position.set(
-  Math.random() * 20 - 10,
-  0,
-  Math.random() * 20 - 10,
-)
+// 跟随路径的行为
+const followPathBehavior = new YUKA.FollowPathBehavior(path);
+vehicle.steering.add(followPathBehavior);
+
+// 保持在路径中的行为
+const onPathBehavior = new YUKA.OnPathBehavior(path, 0.1);
+// 限制权重
+onPathBehavior.weight = 10
+vehicle.steering.add(onPathBehavior);
+
 // 创建对实体管理对象
 const entityManager = new YUKA.EntityManager();
 entityManager.add(vehicle);
-entityManager.add(target);
 
-// 抵达行为
-const arriveBehavior = new YUKA.ArriveBehavior(target.position, 1)
-vehicle.steering.add(arriveBehavior)
-
-// 搜索目标行为
-// const seekBehavior = new YUKA.SeekBehavior(target.position)
-// vehicle.steering.add(seekBehavior)
-
-setInterval(() => {
-  target.position.set(
-    Math.random() * 20 - 10,
-    0,
-    Math.random() * 20 - 10,
-  )
-}, 2000);
-
+showPathLine(path)
 function showPathLine(path) {
   console.log(path);
   const positions = []
